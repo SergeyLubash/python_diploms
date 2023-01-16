@@ -48,7 +48,6 @@ def test_retrieve(auth_user: APIClient, goal: Goal, add_user: User, category: Go
     assert response.data == expected_response
 
 
-
 @pytest.mark.django_db
 def test_delete(auth_user: APIClient, goal: Goal, category: GoalCategory) -> None:
     response = auth_user.delete(reverse('Retrieve-Update-Destroy-goal', args=[goal.pk]))

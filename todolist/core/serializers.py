@@ -1,9 +1,8 @@
-
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 
 
 USER_MODEL = get_user_model()
@@ -34,21 +33,29 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = USER_MODEL
-        fields = '__all__'
+        fields = [
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'password',
+            'password_repeat'
+        ]
 
 
 class LoginSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(required=True)
+    username = serializers.CharField(required=True, write_only=True)
     password = serializers.CharField(required=True, write_only=True)
 
-    def create(self, validated_data):
-        user = authenticate(
-            username=validated_data['username'],
-            password=validated_data['password'],
-        )
+    def validate(self, attrs: dict) -> dict:
+        username = attrs.get('username')
+        password = attrs.get('password')
+        user = authenticate(username=username, password=password)
         if not user:
-            raise AuthenticationFailed
-        return user
+            raise ValidationError('password or username is not correct')
+        attrs["user"] = user
+        return attrs
 
     class Meta:
         model = USER_MODEL

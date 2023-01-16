@@ -10,8 +10,8 @@ class Board(models.Model):
 
     title = models.CharField(verbose_name='Название', max_length=255)
     is_deleted = models.BooleanField(verbose_name='Удалена', default=False)
-    created = models.DateTimeField(verbose_name='Дата создания')
-    updated = models.DateTimeField(verbose_name='Дата последнего обновления')
+    created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated = models.DateTimeField(auto_now_add=True, verbose_name='Дата последнего обновления')
 
     def save(self, *args, **kwargs):
         if not self.id:  # Когда объект только создается, у него еще нет id
@@ -47,6 +47,8 @@ class BoardParticipant(models.Model):
     role = models.PositiveSmallIntegerField(
         verbose_name='Роль', choices=Role.choices, default=Role.owner
     )
+    created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated = models.DateTimeField(auto_now=True, verbose_name="Дата последнего обновления")
 
 
 class GoalCategory(models.Model):
@@ -55,14 +57,14 @@ class GoalCategory(models.Model):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
-    title = models.CharField(verbose_name='Название', max_length=255)
-    user = models.ForeignKey('core.User', verbose_name='Автор', on_delete=models.PROTECT)
-    is_deleted = models.BooleanField(verbose_name='Удалена', default=False)
     board = models.ForeignKey(
         Board, verbose_name='Доска', on_delete=models.PROTECT, related_name='categories'
     )
-    created = models.DateTimeField(verbose_name='Дата создания')
-    updated = models.DateTimeField(verbose_name='Дата последнего обновления')
+    title = models.CharField(verbose_name='Название', max_length=255)
+    user = models.ForeignKey('core.User', verbose_name='Автор', on_delete=models.PROTECT)
+    is_deleted = models.BooleanField(verbose_name='Удалена', default=False)
+    created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated = models.DateTimeField(auto_now_add=True, verbose_name='Дата последнего обновления')
 
     def save(self, *args, **kwargs):
         if not self.id:  # Когда объект только создается, у него еще нет id
@@ -85,18 +87,31 @@ class Goal(models.Model):
         critical = 4, 'Критический'
 
     title = models.CharField(verbose_name='Название', max_length=255)
-    description = models.TextField(verbose_name='Описание')
+    description = models.TextField(verbose_name='Описание', null=True, blank=True)
     status = models.PositiveSmallIntegerField(
-        verbose_name='Статус', choices=Status.choices, default=Status.to_do
+        verbose_name='Статус',
+        choices=Status.choices,
+        default=Status.to_do
     )
     priority = models.PositiveSmallIntegerField(
-        verbose_name='Приоритет', choices=Priority.choices, default=Priority.medium
+        verbose_name='Приоритет',
+        choices=Priority.choices,
+        default=Priority.medium
     )
-    due_date = models.DateField(verbose_name='Дата выполнения')
-    user = models.ForeignKey('core.User', verbose_name='Автор', on_delete=models.PROTECT)
-    category = models.ForeignKey(GoalCategory, verbose_name='категория', related_name='goals', on_delete=models.CASCADE)
-    created = models.DateTimeField(verbose_name='Дата создания')
-    updated = models.DateTimeField(verbose_name='Дата последнего обновления')
+    due_date = models.DateField(verbose_name='Дата выполнения', null=True, blank=True)
+    user = models.ForeignKey(
+        'core.User',
+        verbose_name='Автор',
+        on_delete=models.PROTECT
+    )
+    category = models.ForeignKey(
+        GoalCategory,
+        verbose_name='категория',
+        related_name='goals',
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated = models.DateTimeField(auto_now_add=True, verbose_name='Дата последнего обновления')
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -124,8 +139,8 @@ class GoalComment(models.Model):
         on_delete=models.PROTECT,
         related_name='comments',
     )
-    created = models.DateTimeField(verbose_name='Дата создания')
-    updated = models.DateTimeField(verbose_name='Дата последнего обновления')
+    created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated = models.DateTimeField(auto_now_add=True, verbose_name='Дата последнего обновления')
 
     def save(self, *args, **kwargs):
         if not self.id:

@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import os
 from django.core.management.base import BaseCommand
 
 from bot.tg.client import TgClient
@@ -29,7 +29,11 @@ STATE = TgState(state=TgState.DEFAULT)
 
 class Command(BaseCommand):
     help = 'Runs telegram bot'
-    tg_client = TgClient("5635881270:AAEmYHi5UWvLz4OXA-KqiJgY6Au8_Px32rY")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tg_client = TgClient(os.environ.get('TG_BOT_API_TOKEN'))
+        self.offset = 0
 
     def choose_category(self, msg: Message, tg_user: TgUser):
         goal_categories = GoalCategory.objects.filter(
@@ -59,7 +63,7 @@ class Command(BaseCommand):
                 text=f'Категории "{msg.text}" не существует'
             )
 
-    def create_goal(self, msg: Message, tg_user: TgUser):
+    def create_goal(self, msg: Message, tg_user: TgUser, category: GoalCategory):
         category = GoalCategory.objects.get(pk=STATE.category_id)
         goal = Goal.objects.create(
             title=msg.text,
