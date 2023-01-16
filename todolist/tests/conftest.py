@@ -1,57 +1,57 @@
-from datetime import datetime
-
 import pytest
-from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
-import factories
+from rest_framework.test import APIClient
 
+from core.models import User
+from goals.models import Board, BoardParticipant, GoalCategory, Goal, GoalComment
+from tests.factories import (
+    BoardFactory,
+    BoardParticipantFactory,
+    CategoryFactory,
+    GoalFactory,
+    CommentFactory,
+)
 
 USER_MODEL = get_user_model()
 
 
 @pytest.fixture
-def test_user(db):
-    user = USER_MODEL.objects.create(
-        username='sergo',
-        password='qazxsw23',
-        email='sergo@ya.ru',
+def auth_user(add_user: User) -> APIClient:
+    client = APIClient()
+    client.login(username='john', password='test1234')
+    return client
+
+
+@pytest.fixture
+def add_user(db) -> User:
+    user = USER_MODEL.objects.create_user(
+        username='john',
+        email='john@gmail.com',
+        password='test1234'
     )
     return user
 
 
 @pytest.fixture
-def auth_client(test_user):
-    client = APIClient()
-    client.force_authenticate(test_user)
-    return client
+def board() -> Board:
+    return BoardFactory.create()
 
 
 @pytest.fixture
-def category(board, test_user):
-    return factories.GoalCategoryFactory.create(board=board, user=test_user)
+def board_participant(add_user: User, board: Board) -> BoardParticipant:
+    return BoardParticipantFactory.create(user=add_user, board=board)
 
 
 @pytest.fixture
-def board():
-    return factories.BoardFactory.create()
+def category(board: Board, add_user: User, board_participant: BoardParticipant) -> GoalCategory:
+    return CategoryFactory.create(board=board, user=add_user)
 
 
 @pytest.fixture
-def board_participant(test_user, board):
-    participant = factories.BoardParticipantFactory.create(
-        board=board,
-        user=test_user,
-    )
-    return participant
+def goal(category: GoalCategory, add_user: User) -> Goal:
+    return GoalFactory.create(user=add_user, category=category)
 
 
 @pytest.fixture
-def goal(category, test_user):
-    test_date = datetime.now().date()
-    return factories.GoalFactory.create(
-        title='New Goal',
-        category=category,
-        description='Test retrieve goal',
-        due_date=test_date,
-        user=test_user,
-    )
+def comment(goal: Goal, add_user: User) -> GoalComment:
+    return CommentFactory.create(user=add_user, goal=goal)
