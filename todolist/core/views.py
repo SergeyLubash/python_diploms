@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model, login, logout
 from django.contrib.sites import requests
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
-from rest_framework.generics import GenericAPIView
 
 from .serializers import RegistrationSerializer, LoginSerializer, ProfileSerializer, UpdatePasswordSerializer
 

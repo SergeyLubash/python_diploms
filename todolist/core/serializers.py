@@ -54,7 +54,7 @@ class LoginSerializer(serializers.ModelSerializer):
         user = authenticate(username=username, password=password)
         if not user:
             raise ValidationError('password or username is not correct')
-        attrs["user"] = user
+        attrs['user'] = user
         return attrs
 
     class Meta:
